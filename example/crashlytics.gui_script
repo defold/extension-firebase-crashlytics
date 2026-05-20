@@ -1,0 +1,100 @@
+local crashlytics = firebase and firebase.crashlytics
+local gooey = require "gooey.gooey"
+
+local BUTTON_NORMAL = vmath.vector4(0.13, 0.14, 0.16, 1)
+local BUTTON_HOVER = vmath.vector4(0.22, 0.24, 0.27, 1)
+local BUTTON_PRESSED = vmath.vector4(0.33, 0.36, 0.40, 1)
+
+local function is_android()
+    return sys.get_sys_info().system_name == "Android"
+end
+
+local function initialize_crashlytics(self)
+    if self.crashlytics_initialized then
+        return true
+    end
+
+    if not crashlytics then
+        print("Firebase Crashlytics extension is unavailable")
+        return false
+    end
+
+    self.crashlytics_initialized = crashlytics.initialize()
+    if self.crashlytics_initialized then
+        crashlytics.set_user_id("test-user")
+        crashlytics.set_custom_key("test_build", true)
+        crashlytics.log("Crashlytics example initialized")
+    else
+        print("Firebase Crashlytics initialization failed")
+    end
+    return self.crashlytics_initialized
+end
+
+local function initialize_firebase(self)
+    if not firebase then
+        print("Firebase extension is unavailable")
+        return
+    end
+
+    firebase.set_callback(function(_, message_id, message)
+        if message_id == firebase.MSG_INITIALIZED then
+            initialize_crashlytics(self)
+        elseif message_id == firebase.MSG_ERROR then
+            print("Firebase error: " .. tostring(message and message.error))
+        end
+    end)
+    firebase.initialize()
+end
+
+local function log_before_crash(self, message)
+    if not initialize_crashlytics(self) then
+        return false
+    end
+    crashlytics.log(message)
+    return true
+end
+
+local function update_button(button)
+    if button.pressed_now then
+        gui.set_color(button.node, BUTTON_PRESSED)
+    elseif button.over_now then
+        gui.set_color(button.node, BUTTON_HOVER)
+    elseif button.released_now or button.out_now then
+        gui.set_color(button.node, BUTTON_NORMAL)
+    end
+end
+
+function init(self)
+    gooey.acquire_input()
+    print("Firebase Crashlytics extension example")
+
+    self.is_android = is_android()
+    gui.set_enabled(gui.get_node("crash_java"), self.is_android)
+    gui.set_enabled(gui.get_node("crash_java_text"), self.is_android)
+
+    initialize_firebase(self)
+end
+
+function on_input(self, action_id, action)
+    gooey.button("crash_native", action_id, action, function()
+        if log_before_crash(self, "Before Crashlytics native test crash") then
+            crashlytics.test_native_crash()
+        end
+    end, update_button)
+
+    gooey.button("crash_lua", action_id, action, function()
+        local message = "Firebase Crashlytics Lua test crash"
+        if log_before_crash(self, "Before Crashlytics Lua test crash") then
+            crashlytics.record_exception(message)
+        end
+        error(message)
+    end, update_button)
+
+    if self.is_android then
+        gooey.button("crash_java", action_id, action, function()
+            if log_before_crash(self, "Before Crashlytics Java test crash") then
+                crashlytics.test_java_crash()
+            end
+        end, update_button)
+    end
+end

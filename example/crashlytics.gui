@@ -1,0 +1,110 @@
+script: "/example/crashlytics.gui_script"
+fonts {
+  name: "crashlytics"
+  font: "/assets/fonts/crashlytics.font"
+}
+nodes {
+  position {
+    x: 320.0
+    y: 720.0
+  }
+  size {
+    x: 320.0
+    y: 64.0
+  }
+  color {
+    x: 0.13
+    y: 0.14
+    z: 0.16
+  }
+  type: TYPE_BOX
+  id: "crash_native"
+  layer: "button"
+  inherit_alpha: true
+}
+nodes {
+  size {
+    x: 260.0
+    y: 64.0
+  }
+  type: TYPE_TEXT
+  text: "Crash native"
+  font: "crashlytics"
+  id: "crash_native_text"
+  parent: "crash_native"
+  layer: "text"
+  inherit_alpha: true
+}
+nodes {
+  position {
+    x: 320.0
+    y: 640.0
+  }
+  size {
+    x: 320.0
+    y: 64.0
+  }
+  color {
+    x: 0.13
+    y: 0.14
+    z: 0.16
+  }
+  type: TYPE_BOX
+  id: "crash_lua"
+  layer: "button"
+  inherit_alpha: true
+}
+nodes {
+  size {
+    x: 260.0
+    y: 64.0
+  }
+  type: TYPE_TEXT
+  text: "Crash Lua"
+  font: "crashlytics"
+  id: "crash_lua_text"
+  parent: "crash_lua"
+  layer: "text"
+  inherit_alpha: true
+}
+nodes {
+  position {
+    x: 320.0
+    y: 560.0
+  }
+  size {
+    x: 320.0
+    y: 64.0
+  }
+  color {
+    x: 0.13
+    y: 0.14
+    z: 0.16
+  }
+  type: TYPE_BOX
+  id: "crash_java"
+  layer: "button"
+  inherit_alpha: true
+}
+nodes {
+  size {
+    x: 260.0
+    y: 64.0
+  }
+  type: TYPE_TEXT
+  text: "Crash Java"
+  font: "crashlytics"
+  id: "crash_java_text"
+  parent: "crash_java"
+  layer: "text"
+  inherit_alpha: true
+}
+layers {
+  name: "button"
+}
+layers {
+  name: "text"
+}
+material: "/builtins/materials/gui.material"
+adjust_reference: ADJUST_REFERENCE_PARENT
+max_nodes: 32
