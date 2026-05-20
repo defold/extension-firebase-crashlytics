@@ -1,0 +1,20 @@
+[project]
+title = extension-firebase-crashlytics
+bundle_resources = /bundle
+dependencies#0 = https://github.com/defold/extension-firebase/archive/refs/heads/master.zip
+
+[bootstrap]
+main_collection = /example/main.collectionc
+
+[input]
+game_binding = /input/game.input_bindingc
+
+[script]
+shared_state = 1
+
+[library]
+include_dirs = firebase_crashlytics
+
+[android]
+package = com.defold.firebase
+minimum_sdk_version = 23

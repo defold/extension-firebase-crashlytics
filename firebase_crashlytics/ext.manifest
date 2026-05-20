@@ -1,0 +1,6 @@
+name: "FirebaseCrashlyticsExt"
+
+platforms:
+  android:
+    context:
+      aaptExtraPackages: ['com.google.android.gms.common']

@@ -1,0 +1,47 @@
+local CRASH_TEST = "native" -- "java", "native", or nil
+local CRASH_ONCE = true
+
+local function should_run_crash_test()
+    if not CRASH_TEST then
+        return false
+    end
+
+    if not CRASH_ONCE then
+        return true
+    end
+
+    local path = sys.get_save_file("firebase_crashlytics", "crash-test")
+    local state = sys.load(path) or {}
+    if state[CRASH_TEST] then
+        print("Crashlytics " .. CRASH_TEST .. " test already triggered")
+        return false
+    end
+
+    state[CRASH_TEST] = true
+    sys.save(path, state)
+    return true
+end
+
+function init(self)
+    print("Firebase Crashlytics extension example")
+    firebase.initialize()
+
+    timer.delay(1, false, function()
+        assert(firebase.crashlytics.initialize())
+        firebase.crashlytics.set_user_id("test-user")
+        firebase.crashlytics.set_custom_key("test_build", true)
+        firebase.crashlytics.log("Before Crashlytics test crash")
+    end)
+
+    timer.delay(6, false, function()
+        if not should_run_crash_test() then
+            return
+        end
+
+        if CRASH_TEST == "java" then
+            firebase.crashlytics.test_java_crash()
+        elseif CRASH_TEST == "native" then
+            firebase.crashlytics.test_native_crash()
+        end
+    end)
+end
