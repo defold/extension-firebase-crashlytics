@@ -17,6 +17,16 @@ If your project provides `google-services.xml` resources on Android, Firebase ca
 
 On iOS and macOS, add `GoogleService-Info.plist` to the bundle. If the core Firebase extension is not used, `firebase.crashlytics.initialize()` configures the default Firebase app from that plist.
 
+Place platform bundle files under the platform-specific bundle resource directories:
+
+```text
+bundle/android/res/values/google-services.xml
+bundle/ios/GoogleService-Info.plist
+bundle/osx/Contents/Resources/GoogleService-Info.plist
+```
+
+The macOS plist must be inside `Contents/Resources`. Files placed directly in the `.app` bundle root, such as `bundle/osx/GoogleService-Info.plist`, will make macOS code signing fail.
+
 Current Firebase Android SDKs require Android API level 23 or newer. Set this in `game.project`:
 
 ```ini
