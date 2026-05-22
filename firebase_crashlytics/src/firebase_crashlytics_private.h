@@ -1,6 +1,7 @@
-#if defined(DM_PLATFORM_ANDROID)
-
 #pragma once
+
+#if defined(DM_PLATFORM_ANDROID) || defined(DM_PLATFORM_IOS) || defined(DM_PLATFORM_OSX)
+#define DM_FIREBASE_CRASHLYTICS_SUPPORTED 1
 
 namespace dmFirebaseCrashlytics {
     void Initialize_Ext();
@@ -16,7 +17,9 @@ namespace dmFirebaseCrashlytics {
     void SetCustomKeyNumber(const char* key, double value);
     void Log(const char* message);
     void RecordException(const char* message);
+#if defined(DM_PLATFORM_ANDROID)
     void TestJavaCrash();
+#endif
 } // namespace dmFirebaseCrashlytics
 
 #endif

@@ -6,9 +6,9 @@
 #include <dmsdk/dlib/log.h>
 #include <dmsdk/sdk.h>
 
-#if defined(DM_PLATFORM_ANDROID)
-
 #include "firebase_crashlytics_private.h"
+
+#if defined(DM_FIREBASE_CRASHLYTICS_SUPPORTED)
 
 namespace dmFirebaseCrashlytics {
 
@@ -100,12 +100,14 @@ static int Lua_RecordException(lua_State* L)
     return 0;
 }
 
+#if defined(DM_PLATFORM_ANDROID)
 static int Lua_TestJavaCrash(lua_State* L)
 {
     DM_LUA_STACK_CHECK(L, 0);
     TestJavaCrash();
     return 0;
 }
+#endif
 
 static int Lua_TestNativeCrash(lua_State* L)
 {
@@ -127,7 +129,9 @@ static const luaL_reg Module_methods[] =
     {"set_custom_key", Lua_SetCustomKey},
     {"log", Lua_Log},
     {"record_exception", Lua_RecordException},
+#if defined(DM_PLATFORM_ANDROID)
     {"test_java_crash", Lua_TestJavaCrash},
+#endif
     {"test_native_crash", Lua_TestNativeCrash},
     {0, 0}
 };
@@ -164,7 +168,9 @@ dmExtension::Result InitializeFirebaseCrashlyticsExtension(dmExtension::Params* 
 
     LuaInit(params->m_L);
     Initialize_Ext();
+#if defined(DM_PLATFORM_ANDROID)
     Initialize();
+#endif
 
     return dmExtension::RESULT_OK;
 }
@@ -188,7 +194,7 @@ dmExtension::Result UpdateFirebaseCrashlyticsExtension(dmExtension::Params* para
 
 DM_DECLARE_EXTENSION(EXTENSION_NAME, LIB_NAME, dmFirebaseCrashlytics::AppInitializeFirebaseCrashlyticsExtension, dmFirebaseCrashlytics::AppFinalizeFirebaseCrashlyticsExtension, dmFirebaseCrashlytics::InitializeFirebaseCrashlyticsExtension, dmFirebaseCrashlytics::UpdateFirebaseCrashlyticsExtension, 0, dmFirebaseCrashlytics::FinalizeFirebaseCrashlyticsExtension)
 
-#else // DM_PLATFORM_ANDROID
+#else // DM_FIREBASE_CRASHLYTICS_SUPPORTED
 
 static dmExtension::Result InitializeFirebaseCrashlytics(dmExtension::Params* params)
 {
@@ -203,4 +209,4 @@ static dmExtension::Result FinalizeFirebaseCrashlytics(dmExtension::Params* para
 
 DM_DECLARE_EXTENSION(EXTENSION_NAME, LIB_NAME, 0, 0, InitializeFirebaseCrashlytics, 0, 0, FinalizeFirebaseCrashlytics)
 
-#endif // DM_PLATFORM_ANDROID
+#endif // DM_FIREBASE_CRASHLYTICS_SUPPORTED

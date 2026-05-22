@@ -1,0 +1,3 @@
+platform :ios, '13.0'
+
+pod 'FirebaseCrashlytics', '11.15.0'

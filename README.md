@@ -2,26 +2,33 @@
 
 # Firebase Crashlytics for Defold
 
-Defold native extension that integrates [Firebase Crashlytics](https://firebase.google.com/docs/crashlytics) for Android, including native crash capture through the Firebase Crashlytics NDK SDK.
-
-This extension is Android-focused. Other platforms register a no-op extension.
+Defold native extension that integrates [Firebase Crashlytics](https://firebase.google.com/docs/crashlytics) for Android, iOS, and macOS. Android uses the Firebase Crashlytics NDK SDK for native crash capture. Apple platforms use the Firebase Crashlytics Apple SDK.
 
 ## Setup
 
-Add this extension and the core Firebase extension to your project dependencies. The core Firebase extension is responsible for creating the default Firebase app:
+Add this extension to your project dependencies. If your project uses the core Firebase extension, initialize Firebase before Crashlytics:
 
 ```lua
 firebase.initialize()
 firebase.crashlytics.initialize()
 ```
 
-If your project provides `google-services.xml` resources, Firebase can initialize automatically through `FirebaseInitProvider`, and this extension will try to initialize Crashlytics during extension startup. If you initialize Firebase manually from Lua, call `firebase.crashlytics.initialize()` after `firebase.initialize()`.
+If your project provides `google-services.xml` resources on Android, Firebase can initialize automatically through `FirebaseInitProvider`, and this extension will try to initialize Crashlytics during extension startup. If you initialize Firebase manually from Lua, call `firebase.crashlytics.initialize()` after `firebase.initialize()`.
+
+On iOS and macOS, add `GoogleService-Info.plist` to the bundle. If the core Firebase extension is not used, `firebase.crashlytics.initialize()` configures the default Firebase app from that plist.
 
 Current Firebase Android SDKs require Android API level 23 or newer. Set this in `game.project`:
 
 ```ini
 [android]
 minimum_sdk_version = 23
+```
+
+For macOS, Firebase recommends enabling Objective-C exception crashing. This extension contributes the following app `Info.plist` value:
+
+```xml
+<key>NSApplicationCrashOnExceptions</key>
+<true/>
 ```
 
 ## API
@@ -41,8 +48,10 @@ end
 For setup testing:
 
 ```lua
-firebase.crashlytics.test_java_crash()
 firebase.crashlytics.test_native_crash()
+if sys.get_sys_info().system_name == "Android" then
+    firebase.crashlytics.test_java_crash()
+end
 ```
 
 Crashlytics uploads reports after the app is restarted.
@@ -67,9 +76,12 @@ firebase crashlytics:symbols:upload \
 
 `FIREBASE_ANDROID_APP_ID` is the Firebase Android app id, for example `1:1234567890:android:abcdef`, not the Android package name.
 
+On iOS and macOS, upload the generated dSYM files to Crashlytics for readable Apple stack traces. Firebase's Apple setup guide describes the Xcode run script flow; for Defold/Bob builds, use the generated dSYMs from the bundle output with the `FirebaseCrashlytics/upload-symbols` script.
+
 ## Notes
 
 - The extension includes `firebase-crashlytics-ndk` through `manifests/android/build.gradle`; Extender resolves the AAR and Bob packages the AAR `jni/<abi>` libraries into the final Android bundle.
+- The extension includes `FirebaseCrashlytics` CocoaPods manifests for iOS and macOS, both pinned to the same Firebase Apple SDK version used by the other Firebase extensions in this workspace.
 - Current Firebase dependencies require `android.minimum_sdk_version = 23`; Defold's default is 21.
 - The extension adds `com.google.firebase.crashlytics.mapping_file_id` with value `none` so Crashlytics can run without the Gradle plugin.
 - Defold already links Android engines with a GNU build id, which Crashlytics needs to match native crashes to uploaded symbols.
