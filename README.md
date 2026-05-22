@@ -66,6 +66,8 @@ end
 
 Crashlytics uploads reports after the app is restarted.
 
+When testing Apple crashes, run the app without the Xcode debugger attached, force the crash, then restart the app so Crashlytics can upload the stored report.
+
 ## Native symbols
 
 Crashlytics can capture native crashes without symbol upload, but native stack traces will not be readable until matching unstripped symbols are uploaded.

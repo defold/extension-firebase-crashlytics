@@ -24,6 +24,11 @@ local function initialize_crashlytics(self)
         crashlytics.set_user_id("test-user")
         crashlytics.set_custom_key("test_build", true)
         crashlytics.log("Crashlytics example initialized")
+        print("Firebase Crashlytics collection enabled: " .. tostring(crashlytics.is_enabled()))
+        if crashlytics.did_crash_on_previous_execution() then
+            print("Firebase Crashlytics detected a crash in the previous execution; sending unsent reports")
+            crashlytics.send_unsent_reports()
+        end
     else
         print("Firebase Crashlytics initialization failed")
     end
