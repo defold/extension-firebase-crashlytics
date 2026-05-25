@@ -109,7 +109,7 @@ public class FirebaseCrashlyticsJNI {
         }
 
         if (FirebaseApp.getApps(activity.getApplicationContext()).isEmpty()) {
-            Log.e(TAG, "FirebaseApp is not initialized. Call firebase.initialize() first or provide google-services.xml resources for automatic initialization.");
+            Log.e(TAG, "FirebaseApp is not initialized. Call firebase.initialize() before firebase.crashlytics.initialize().");
             return null;
         }
 

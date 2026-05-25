@@ -7,7 +7,6 @@
 
 #import <Foundation/Foundation.h>
 #import <FirebaseCore/FirebaseCore.h>
-#import <FirebaseCore/FIROptions.h>
 #import <FirebaseCrashlytics/FirebaseCrashlytics.h>
 
 namespace dmFirebaseCrashlytics {
@@ -23,72 +22,11 @@ static NSString* ToNSString(const char* value)
     return string ? string : @"";
 }
 
-static void AddExistingPath(NSMutableArray* paths, NSString* path)
-{
-    if (path && ![paths containsObject:path])
-    {
-        [paths addObject:path];
-    }
-}
-
-static NSString* FindGoogleServiceInfoPlist()
-{
-    NSBundle* bundle = [NSBundle mainBundle];
-    NSFileManager* file_manager = [NSFileManager defaultManager];
-    NSMutableArray* paths = [NSMutableArray array];
-
-    AddExistingPath(paths, [bundle pathForResource:@"GoogleService-Info" ofType:@"plist"]);
-    AddExistingPath(paths, [[bundle resourcePath] stringByAppendingPathComponent:@"GoogleService-Info.plist"]);
-    AddExistingPath(paths, [[bundle bundlePath] stringByAppendingPathComponent:@"GoogleService-Info.plist"]);
-
-    NSString* current_directory = [file_manager currentDirectoryPath];
-    AddExistingPath(paths, [current_directory stringByAppendingPathComponent:@"GoogleService-Info.plist"]);
-    AddExistingPath(paths, [current_directory stringByAppendingPathComponent:@"bundle/osx/Contents/Resources/GoogleService-Info.plist"]);
-    AddExistingPath(paths, [current_directory stringByAppendingPathComponent:@"bundle/osx/GoogleService-Info.plist"]);
-    AddExistingPath(paths, [current_directory stringByAppendingPathComponent:@"bundle/common/GoogleService-Info.plist"]);
-
-    for (NSString* path in paths)
-    {
-        if ([file_manager fileExistsAtPath:path])
-        {
-            return path;
-        }
-    }
-    return nil;
-}
-
-static bool ConfigureFirebaseApp()
-{
-    if ([FIRApp defaultApp])
-    {
-        return true;
-    }
-
-    NSString* plist_path = FindGoogleServiceInfoPlist();
-    if (!plist_path)
-    {
-        dmLogError("GoogleService-Info.plist not found. Checked app bundle resources, app bundle root, current directory, bundle/osx/Contents/Resources, bundle/osx, and bundle/common.");
-        [FIRApp configure];
-        return [FIRApp defaultApp] != nil;
-    }
-
-    FIROptions* options = [[FIROptions alloc] initWithContentsOfFile:plist_path];
-    if (!options)
-    {
-        dmLogError("Unable to load Firebase options from %s", [plist_path UTF8String]);
-        return false;
-    }
-
-    dmLogInfo("Configuring Firebase from %s", [plist_path UTF8String]);
-    [FIRApp configureWithOptions:options];
-    return [FIRApp defaultApp] != nil;
-}
-
 static FIRCrashlytics* GetCrashlytics()
 {
     if (![FIRApp defaultApp])
     {
-        dmLogError("FirebaseApp is not initialized. Call firebase.initialize() first, or call firebase.crashlytics.initialize() with GoogleService-Info.plist in the bundle.");
+        dmLogError("FirebaseApp is not initialized. Call firebase.initialize() before firebase.crashlytics.initialize().");
         return nil;
     }
     return [FIRCrashlytics crashlytics];
@@ -102,11 +40,7 @@ bool Initialize()
 {
     @try
     {
-        if (!ConfigureFirebaseApp())
-        {
-            return false;
-        }
-        return [FIRApp defaultApp] != nil && [FIRCrashlytics crashlytics] != nil;
+        return GetCrashlytics() != nil;
     }
     @catch (NSException* exception)
     {

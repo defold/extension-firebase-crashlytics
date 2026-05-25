@@ -6,16 +6,22 @@ Defold native extension that integrates [Firebase Crashlytics](https://firebase.
 
 ## Setup
 
-Add this extension to your project dependencies. If your project uses the core Firebase extension, initialize Firebase before Crashlytics:
+Add the core Firebase extension and this extension to your project dependencies. Crashlytics requires the core Firebase extension and must be initialized after Firebase:
 
 ```lua
+firebase.set_callback(function(_, message_id, message)
+    if message_id == firebase.MSG_INITIALIZED then
+        firebase.crashlytics.initialize()
+    elseif message_id == firebase.MSG_ERROR then
+        print("Firebase error: " .. tostring(message and message.error))
+    end
+end)
 firebase.initialize()
-firebase.crashlytics.initialize()
 ```
 
-If your project provides `google-services.xml` resources on Android, Firebase can initialize automatically through `FirebaseInitProvider`, and this extension will try to initialize Crashlytics during extension startup. If you initialize Firebase manually from Lua, call `firebase.crashlytics.initialize()` after `firebase.initialize()`.
+Wait for `firebase.MSG_INITIALIZED` before calling `firebase.crashlytics.initialize()`.
 
-On iOS and macOS, add `GoogleService-Info.plist` to the bundle. If the core Firebase extension is not used, `firebase.crashlytics.initialize()` configures the default Firebase app from that plist.
+On iOS and macOS, add `GoogleService-Info.plist` to the bundle so the core Firebase extension can configure the default Firebase app.
 
 Place platform bundle files under the platform-specific bundle resource directories:
 
@@ -98,5 +104,5 @@ On iOS and macOS, upload the generated dSYM files to Crashlytics for readable Ap
 - The extension adds `com.google.firebase.crashlytics.mapping_file_id` with value `none` so Crashlytics can run without the Gradle plugin.
 - Defold already links Android engines with a GNU build id, which Crashlytics needs to match native crashes to uploaded symbols.
 - Java deobfuscation is separate from native symbolication. If ProGuard is enabled, upload `mapping.txt` for readable Java frames.
-- Very early native crashes can only be captured if Firebase and Crashlytics are initialized before the crash, usually through Firebase's automatic resource-based initialization.
+- Very early native crashes can only be captured after the core Firebase extension and Crashlytics have both been initialized.
 - Firebase's non-Gradle NDK instructions mention disabling Android native heap pointer tagging for API 30+ apps. This changes an app-level security setting, so this extension does not set it automatically; add `android:allowNativeHeapPointerTagging="false"` to the project Android manifest only if you intentionally choose that tradeoff.

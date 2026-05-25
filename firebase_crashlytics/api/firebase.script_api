@@ -9,7 +9,7 @@
     members:
     - name: initialize
       type: function
-      desc: Initializes Crashlytics and returns true if a default FirebaseApp is available or can be configured from bundled Firebase resources.
+      desc: Initializes Crashlytics and returns true if the core Firebase extension is available and the default FirebaseApp has been initialized.
       returns:
       - name: initialized
         type: boolean

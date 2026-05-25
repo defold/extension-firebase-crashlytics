@@ -37,8 +37,7 @@ end
 
 local function initialize_firebase(self)
     if not firebase or not firebase.initialize or not firebase.set_callback then
-        print("Firebase core extension is unavailable; initializing Crashlytics directly")
-        initialize_crashlytics(self)
+        print("Firebase core extension is unavailable; Crashlytics requires extension-firebase")
         return
     end
 

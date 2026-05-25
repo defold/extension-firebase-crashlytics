@@ -1,9 +1,10 @@
 [project]
 title = extension-firebase-crashlytics
 bundle_resources = /bundle
-minimum_log_level = 0
+minimum_log_level = 1
+version = 1.01
 dependencies#0 = https://github.com/britzl/gooey/archive/10.5.2.zip
-dependencies#1 = https://github.com/defold/extension-firebase/archive/refs/heads/master.zip
+dependencies#1 = https://github.com/defold/extension-firebase/archive/refs/heads/macos-support.zip
 
 [bootstrap]
 main_collection = /example/main.collectionc
@@ -37,3 +38,4 @@ manifest = /assets/android/AndroidManifest.xml
 
 [osx]
 bundle_identifier = com.defold.firebase
+
