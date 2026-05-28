@@ -55,11 +55,25 @@ firebase.crashlytics.set_custom_key("level", 12)
 firebase.crashlytics.set_custom_key("premium", true)
 firebase.crashlytics.log("Loaded main menu")
 firebase.crashlytics.record_exception("Non-fatal error")
+firebase.crashlytics.record_lua_error("Lua error", "stack traceback:\n...")
 
 if firebase.crashlytics.did_crash_on_previous_execution() then
     print("Previous execution crashed")
 end
 ```
+
+To report uncaught Lua runtime errors, install a Defold error handler after Crashlytics is initialized:
+
+```lua
+sys.set_error_handler(function(source, message, traceback)
+    firebase.crashlytics.set_custom_key("lua_source", tostring(source or ""))
+    firebase.crashlytics.record_lua_error(tostring(message or ""), tostring(traceback or ""))
+end)
+```
+
+`record_lua_error()` records a non-fatal `LuaError`. On Android, parsed Lua traceback lines are sent as `StackTraceElement` frames. On iOS and macOS, parsed Lua traceback lines are sent as `FIRStackFrame` entries.
+
+Lua errors reported this way are non-fatal reports, so check the Crashlytics non-fatal/errors view and restart the app to let Crashlytics upload queued reports. The sample prints `Firebase Crashlytics recorded LuaError non-fatal` when the Defold error handler has handed the Lua error to Crashlytics.
 
 For setup testing:
 

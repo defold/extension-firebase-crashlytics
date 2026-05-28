@@ -20,6 +20,7 @@ namespace dmFirebaseCrashlytics {
         jmethodID m_SetCustomKeyDouble;
         jmethodID m_Log;
         jmethodID m_RecordException;
+        jmethodID m_RecordLuaError;
         jmethodID m_TestJavaCrash;
     };
 
@@ -102,6 +103,7 @@ namespace dmFirebaseCrashlytics {
         g_firebase_crashlytics.m_SetCustomKeyDouble = env->GetMethodID(cls, "setCustomKeyDouble", "(Ljava/lang/String;D)V");
         g_firebase_crashlytics.m_Log = env->GetMethodID(cls, "log", "(Ljava/lang/String;)V");
         g_firebase_crashlytics.m_RecordException = env->GetMethodID(cls, "recordException", "(Ljava/lang/String;)V");
+        g_firebase_crashlytics.m_RecordLuaError = env->GetMethodID(cls, "recordLuaError", "(Ljava/lang/String;Ljava/lang/String;)V");
         g_firebase_crashlytics.m_TestJavaCrash = env->GetMethodID(cls, "testJavaCrash", "()V");
     }
 
@@ -175,6 +177,11 @@ namespace dmFirebaseCrashlytics {
     void RecordException(const char* message)
     {
         CallVoidMethodChar(g_firebase_crashlytics.m_JNI, g_firebase_crashlytics.m_RecordException, message);
+    }
+
+    void RecordLuaError(const char* message, const char* traceback)
+    {
+        CallVoidMethodCharChar(g_firebase_crashlytics.m_JNI, g_firebase_crashlytics.m_RecordLuaError, message, traceback);
     }
 
     void TestJavaCrash()

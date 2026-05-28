@@ -3,11 +3,19 @@ package com.defold.firebase.crashlytics;
 import android.app.Activity;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 public class FirebaseCrashlyticsJNI {
     private static final String TAG = "FirebaseCrashlyticsJNI";
+    private static final Pattern LUA_FRAME_PATTERN = Pattern.compile("^\\s*(.+):(\\d+):\\s*(.*)$");
+    private static final Pattern LUA_NAMED_FUNCTION_PATTERN = Pattern.compile("in function '([^']+)'");
+    private static final Pattern LUA_ANONYMOUS_FUNCTION_PATTERN = Pattern.compile("in function <(.+)>");
 
     private final Activity activity;
     private FirebaseCrashlytics crashlytics;
@@ -93,6 +101,21 @@ public class FirebaseCrashlyticsJNI {
         }
     }
 
+    public void recordLuaError(String message, String traceback) {
+        FirebaseCrashlytics instance = getCrashlytics();
+        if (instance != null) {
+            if (traceback != null && traceback.length() > 0) {
+                instance.log(traceback);
+            }
+
+            LuaError exception = new LuaError(safeString(message));
+            StackTraceElement[] stackTrace = parseLuaStackTrace(traceback);
+            exception.setStackTrace(stackTrace);
+            instance.recordException(exception);
+            Log.i(TAG, "Recorded LuaError non-fatal with " + stackTrace.length + " Lua stack frame(s).");
+        }
+    }
+
     public void testJavaCrash() {
         getCrashlytics();
         activity.runOnUiThread(new Runnable() {
@@ -115,5 +138,83 @@ public class FirebaseCrashlyticsJNI {
 
         crashlytics = FirebaseCrashlytics.getInstance();
         return crashlytics;
+    }
+
+    private static StackTraceElement[] parseLuaStackTrace(String traceback) {
+        if (traceback == null || traceback.length() == 0) {
+            return new StackTraceElement[0];
+        }
+
+        String[] lines = traceback.split("\\r?\\n");
+        List<StackTraceElement> frames = new ArrayList<StackTraceElement>();
+        for (String line : lines) {
+            StackTraceElement frame = parseLuaStackFrame(line);
+            if (frame != null) {
+                frames.add(frame);
+            }
+        }
+        return frames.toArray(new StackTraceElement[frames.size()]);
+    }
+
+    private static StackTraceElement parseLuaStackFrame(String line) {
+        if (line == null) {
+            return null;
+        }
+
+        String trimmed = line.trim();
+        if (trimmed.length() == 0 || trimmed.contains("[C]")) {
+            return null;
+        }
+
+        Matcher matcher = LUA_FRAME_PATTERN.matcher(trimmed);
+        if (!matcher.matches()) {
+            return null;
+        }
+
+        String file = matcher.group(1).trim();
+        if (file.length() == 0) {
+            return null;
+        }
+
+        int lineNumber;
+        try {
+            lineNumber = Integer.parseInt(matcher.group(2));
+        } catch (NumberFormatException e) {
+            return null;
+        }
+
+        return new StackTraceElement("lua", parseLuaSymbol(matcher.group(3)), file, lineNumber);
+    }
+
+    private static String parseLuaSymbol(String detail) {
+        if (detail == null || detail.length() == 0) {
+            return "lua";
+        }
+
+        Matcher namedFunction = LUA_NAMED_FUNCTION_PATTERN.matcher(detail);
+        if (namedFunction.find()) {
+            return namedFunction.group(1);
+        }
+
+        Matcher anonymousFunction = LUA_ANONYMOUS_FUNCTION_PATTERN.matcher(detail);
+        if (anonymousFunction.find()) {
+            return "anonymous";
+        }
+
+        if (detail.contains("in main chunk")) {
+            return "main";
+        }
+
+        return "lua";
+    }
+
+    private static String safeString(String value) {
+        return value == null ? "" : value;
+    }
+}
+
+class LuaError extends RuntimeException {
+    LuaError(String message) {
+        super(message);
     }
 }

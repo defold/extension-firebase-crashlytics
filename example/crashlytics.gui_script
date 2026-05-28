@@ -9,6 +9,25 @@ local function is_android()
     return sys.get_sys_info().system_name == "Android"
 end
 
+local function install_lua_error_handler(self)
+    if self.lua_error_handler_installed then
+        return
+    end
+
+    sys.set_error_handler(function(source, message, traceback)
+        if not crashlytics or not self.crashlytics_initialized then
+            return
+        end
+
+        local traceback_string = tostring(traceback or "")
+        crashlytics.set_custom_key("lua_source", tostring(source or ""))
+        crashlytics.record_lua_error(tostring(message or ""), traceback_string)
+        print("Firebase Crashlytics recorded LuaError non-fatal")
+    end)
+
+    self.lua_error_handler_installed = true
+end
+
 local function initialize_crashlytics(self)
     if self.crashlytics_initialized then
         return true
@@ -24,6 +43,7 @@ local function initialize_crashlytics(self)
         crashlytics.set_user_id("test-user")
         crashlytics.set_custom_key("test_build", true)
         crashlytics.log("Crashlytics example initialized")
+        install_lua_error_handler(self)
         print("Firebase Crashlytics collection enabled: " .. tostring(crashlytics.is_enabled()))
         if crashlytics.did_crash_on_previous_execution() then
             print("Firebase Crashlytics detected a crash in the previous execution; sending unsent reports")
@@ -89,9 +109,7 @@ function on_input(self, action_id, action)
 
     gooey.button("crash_lua", action_id, action, function()
         local message = "Firebase Crashlytics Lua test crash"
-        if log_before_crash(self, "Before Crashlytics Lua test crash") then
-            crashlytics.record_exception(message)
-        end
+        log_before_crash(self, "Before Crashlytics Lua test crash")
         error(message)
     end, update_button)
 

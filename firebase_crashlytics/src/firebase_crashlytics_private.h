@@ -17,6 +17,7 @@ namespace dmFirebaseCrashlytics {
     void SetCustomKeyNumber(const char* key, double value);
     void Log(const char* message);
     void RecordException(const char* message);
+    void RecordLuaError(const char* message, const char* traceback);
 #if defined(DM_PLATFORM_ANDROID)
     void TestJavaCrash();
 #endif

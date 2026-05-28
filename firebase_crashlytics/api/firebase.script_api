@@ -82,6 +82,17 @@
         type: string
         desc: Exception message.
 
+    - name: record_lua_error
+      type: function
+      desc: Records a Lua runtime error as a non-fatal exception with parsed Lua stack frames when a traceback is supplied.
+      parameters:
+      - name: message
+        type: string
+        desc: Lua error message.
+      - name: traceback
+        type: string|nil
+        desc: Lua traceback string, typically supplied by sys.set_error_handler. May be nil or omitted.
+
     - name: test_java_crash
       type: function
       desc: Forces a Java crash for Crashlytics setup testing. Android only.

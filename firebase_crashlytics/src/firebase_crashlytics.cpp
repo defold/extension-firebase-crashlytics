@@ -193,6 +193,17 @@ static int Lua_RecordException(lua_State* L)
     return 0;
 }
 
+static int Lua_RecordLuaError(lua_State* L)
+{
+    DM_LUA_STACK_CHECK(L, 0);
+    if (!RequireInitialized())
+    {
+        return 0;
+    }
+    RecordLuaError(luaL_checkstring(L, 1), luaL_optstring(L, 2, ""));
+    return 0;
+}
+
 #if defined(DM_PLATFORM_ANDROID)
 static int Lua_TestJavaCrash(lua_State* L)
 {
@@ -230,6 +241,7 @@ static const luaL_reg Module_methods[] =
     {"set_custom_key", Lua_SetCustomKey},
     {"log", Lua_Log},
     {"record_exception", Lua_RecordException},
+    {"record_lua_error", Lua_RecordLuaError},
 #if defined(DM_PLATFORM_ANDROID)
     {"test_java_crash", Lua_TestJavaCrash},
 #endif
