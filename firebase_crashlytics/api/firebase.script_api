@@ -1,0 +1,102 @@
+- name: firebase
+  type: table
+  desc: Functions and constants for interacting with Firebase
+  members:
+  - name: crashlytics
+    type: table
+    desc: Functions for interacting with Firebase Crashlytics
+
+    members:
+    - name: initialize
+      type: function
+      desc: Initializes Crashlytics and returns true if the core Firebase extension is available and the default FirebaseApp has been initialized.
+      returns:
+      - name: initialized
+        type: boolean
+        desc: True if Crashlytics was initialized.
+
+    - name: set_enabled
+      type: function
+      desc: Sets whether Crashlytics collection is enabled for this app on this device.
+      parameters:
+      - name: enabled
+        type: boolean
+        desc: True to enable Crashlytics collection.
+
+    - name: is_enabled
+      type: function
+      desc: Returns whether Crashlytics collection is enabled.
+      returns:
+      - name: enabled
+        type: boolean
+        desc: True if Crashlytics collection is enabled.
+
+    - name: did_crash_on_previous_execution
+      type: function
+      desc: Returns whether the app crashed during the previous execution.
+      returns:
+      - name: crashed
+        type: boolean
+        desc: True if a crash was recorded during the previous execution.
+
+    - name: send_unsent_reports
+      type: function
+      desc: Sends queued crash reports when automatic collection is disabled.
+
+    - name: delete_unsent_reports
+      type: function
+      desc: Deletes queued crash reports when automatic collection is disabled.
+
+    - name: set_user_id
+      type: function
+      desc: Sets the user ID associated with subsequent fatal, non-fatal, and ANR reports.
+      parameters:
+      - name: user_id
+        type: string
+        desc: User identifier.
+
+    - name: set_custom_key
+      type: function
+      desc: Sets a string, number, or boolean custom key for subsequent fatal, non-fatal, and ANR reports.
+      parameters:
+      - name: key
+        type: string
+        desc: Custom key name.
+      - name: value
+        type: string|number|boolean
+        desc: String, number, or boolean value.
+
+    - name: log
+      type: function
+      desc: Logs a message that is included in the next fatal, non-fatal, or ANR report.
+      parameters:
+      - name: message
+        type: string
+        desc: Log message.
+
+    - name: record_exception
+      type: function
+      desc: Records a non-fatal exception with the supplied message.
+      parameters:
+      - name: message
+        type: string
+        desc: Exception message.
+
+    - name: record_lua_error
+      type: function
+      desc: Records a Lua runtime error as a non-fatal exception with parsed Lua stack frames when a traceback is supplied.
+      parameters:
+      - name: message
+        type: string
+        desc: Lua error message.
+      - name: traceback
+        type: string|nil
+        desc: Lua traceback string, typically supplied by sys.set_error_handler. May be nil or omitted.
+
+    - name: test_java_crash
+      type: function
+      desc: Forces a Java crash for Crashlytics setup testing. Android only.
+
+    - name: test_native_crash
+      type: function
+      desc: Forces a native crash for Crashlytics setup testing.
