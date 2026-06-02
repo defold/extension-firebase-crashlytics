@@ -13,6 +13,8 @@ This extension allows you to integrate Firebase Crashlytics in games on Android,
 To use Firebase Crashlytics in your Defold project, add a version of the Firebase extension and this extension to your `game.project` dependencies from the list of available [Firebase Releases](https://github.com/defold/extension-firebase/releases) and corresponding [Firebase Crashlytics Releases](https://github.com/defold/extension-firebase-crashlytics/releases).
 Find the version you want for both extensions, copy the URLs to the ZIP archives of the releases and add them to the project dependencies.
 
+![](add-dependency.png)
+
 
 ## Setup
 
