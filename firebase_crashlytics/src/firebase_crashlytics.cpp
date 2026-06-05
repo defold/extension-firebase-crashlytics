@@ -19,7 +19,7 @@ static void CrashlyticsLogListener(LogSeverity severity, const char* domain, con
 {
     (void)domain;
 
-    if (!g_Initialized || severity != LOG_SEVERITY_WARNING || formatted_string == 0)
+    if (severity != LOG_SEVERITY_WARNING || formatted_string == 0)
     {
         return;
     }
