@@ -13,6 +13,41 @@
 namespace dmFirebaseCrashlytics {
 
 static bool g_Initialized = false;
+static bool g_LogListenerRegistered = false;
+
+static void CrashlyticsLogListener(LogSeverity severity, const char* domain, const char* formatted_string)
+{
+    (void)domain;
+
+    if (!g_Initialized || severity != LOG_SEVERITY_WARNING || formatted_string == 0)
+    {
+        return;
+    }
+
+    Log(formatted_string);
+}
+
+static void RegisterCrashlyticsLogListener()
+{
+    if (g_LogListenerRegistered)
+    {
+        return;
+    }
+
+    dmLogRegisterListener(CrashlyticsLogListener);
+    g_LogListenerRegistered = true;
+}
+
+static void UnregisterCrashlyticsLogListener()
+{
+    if (!g_LogListenerRegistered)
+    {
+        return;
+    }
+
+    dmLogUnregisterListener(CrashlyticsLogListener);
+    g_LogListenerRegistered = false;
+}
 
 static bool IsFirebaseCoreExtensionAvailable(lua_State* L)
 {
@@ -65,11 +100,21 @@ static int Lua_Initialize(lua_State* L)
     if (!RequireFirebaseCoreExtension(L))
     {
         g_Initialized = false;
+        UnregisterCrashlyticsLogListener();
         lua_pushboolean(L, false);
         return 1;
     }
 
     g_Initialized = Initialize();
+    if (g_Initialized)
+    {
+        RegisterCrashlyticsLogListener();
+    }
+    else
+    {
+        UnregisterCrashlyticsLogListener();
+    }
+
     lua_pushboolean(L, g_Initialized);
     return 1;
 }
@@ -292,6 +337,7 @@ dmExtension::Result AppFinalizeFirebaseCrashlyticsExtension(dmExtension::AppPara
 
 dmExtension::Result FinalizeFirebaseCrashlyticsExtension(dmExtension::Params* params)
 {
+    UnregisterCrashlyticsLogListener();
     g_Initialized = false;
     return dmExtension::RESULT_OK;
 }
