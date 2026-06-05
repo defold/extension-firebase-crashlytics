@@ -116,6 +116,22 @@ public class FirebaseCrashlyticsJNI {
         }
     }
 
+    public void recordLogException(String severity, String domain, String message, String signature) {
+        FirebaseCrashlytics instance = getCrashlytics();
+        if (instance != null) {
+            String safeSeverity = safeString(severity);
+            String safeDomain = safeString(domain);
+            String safeSignature = safeString(signature);
+            boolean fatal = "FATAL".equals(safeSeverity);
+            RuntimeException exception = fatal ? new DefoldLogFatal(safeSignature) : new DefoldLogError(safeSignature);
+            exception.setStackTrace(new StackTraceElement[] {
+                    new StackTraceElement("dmLog", sanitizeStackSymbol(safeSignature), safeDomain.length() == 0 ? "Defold" : safeDomain, 0)
+            });
+            instance.recordException(exception);
+            Log.i(TAG, "Recorded " + (fatal ? "DefoldLogFatal" : "DefoldLogError") + " non-fatal.");
+        }
+    }
+
     public void testJavaCrash() {
         getCrashlytics();
         activity.runOnUiThread(new Runnable() {
@@ -211,10 +227,40 @@ public class FirebaseCrashlyticsJNI {
     private static String safeString(String value) {
         return value == null ? "" : value;
     }
+
+    private static String sanitizeStackSymbol(String value) {
+        String safeValue = safeString(value);
+        if (safeValue.length() == 0) {
+            return "dmLog";
+        }
+
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < safeValue.length() && builder.length() < 120; ++i) {
+            char c = safeValue.charAt(i);
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')) {
+                builder.append(c);
+            } else {
+                builder.append('_');
+            }
+        }
+        return builder.toString();
+    }
 }
 
 class LuaError extends RuntimeException {
     LuaError(String message) {
+        super(message);
+    }
+}
+
+class DefoldLogError extends RuntimeException {
+    DefoldLogError(String message) {
+        super(message);
+    }
+}
+
+class DefoldLogFatal extends RuntimeException {
+    DefoldLogFatal(String message) {
         super(message);
     }
 }

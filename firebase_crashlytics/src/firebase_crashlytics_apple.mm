@@ -22,6 +22,12 @@ static NSString* ToNSString(const char* value)
     return string ? string : @"";
 }
 
+static NSString* ToLogExceptionName(const char* severity)
+{
+    NSString* severityString = ToNSString(severity);
+    return [severityString isEqualToString:@"FATAL"] ? @"DefoldLogFatal" : @"DefoldLogError";
+}
+
 static FIRCrashlytics* GetCrashlytics()
 {
     if (![FIRApp defaultApp])
@@ -248,7 +254,7 @@ void RecordException(const char* message)
     FIRCrashlytics* crashlytics = GetCrashlytics();
     if (crashlytics)
     {
-        FIRExceptionModel* model = [FIRExceptionModel exceptionModelWithName:@"LuaError" reason:ToNSString(message)];
+        FIRExceptionModel* model = [FIRExceptionModel exceptionModelWithName:@"Exception" reason:ToNSString(message)];
         [crashlytics recordExceptionModel:model];
     }
 }
@@ -270,6 +276,19 @@ void RecordLuaError(const char* message, const char* traceback)
         {
             model.stackTrace = stackTrace;
         }
+        [crashlytics recordExceptionModel:model];
+    }
+}
+
+void RecordLogException(const char* severity, const char* domain, const char* message, const char* signature)
+{
+    (void)message;
+    FIRCrashlytics* crashlytics = GetCrashlytics();
+    if (crashlytics)
+    {
+        NSString* signatureString = ToNSString(signature);
+        FIRExceptionModel* model = [FIRExceptionModel exceptionModelWithName:ToLogExceptionName(severity) reason:signatureString];
+        model.stackTrace = @[[FIRStackFrame stackFrameWithSymbol:signatureString file:ToNSString(domain) line:0]];
         [crashlytics recordExceptionModel:model];
     }
 }

@@ -18,6 +18,7 @@ namespace dmFirebaseCrashlytics {
     void Log(const char* message);
     void RecordException(const char* message);
     void RecordLuaError(const char* message, const char* traceback);
+    void RecordLogException(const char* severity, const char* domain, const char* message, const char* signature);
 #if defined(DM_PLATFORM_ANDROID)
     void TestJavaCrash();
 #endif

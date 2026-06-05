@@ -61,7 +61,7 @@ if firebase.crashlytics.did_crash_on_previous_execution() then
 end
 ```
 
-After Crashlytics is initialized, Defold `dmLogWarning()` messages are automatically added to Crashlytics logs and included with the next fatal, non-fatal, or ANR report.
+After Crashlytics is initialized, Defold `dmLogWarning()` messages are automatically added to Crashlytics logs and included with the next fatal, non-fatal, or ANR report. Defold `dmLogError()` and `dmLogFatal()` messages are also added to Crashlytics logs and are recorded as non-fatal `DefoldLogError` or `DefoldLogFatal` reports with normalized signatures for grouping. To avoid flooding Crashlytics, only the first distinct error signatures are recorded during a session; fatal log reports are still recorded when the error cap has been reached. Defold crash backtrace logs such as `CALL STACK` are kept as logs only, so Crashlytics native crash reports remain grouped by the actual crash.
 
 To report uncaught Lua runtime errors, install a Defold error handler after Crashlytics is initialized:
 

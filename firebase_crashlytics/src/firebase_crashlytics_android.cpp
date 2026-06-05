@@ -21,6 +21,7 @@ namespace dmFirebaseCrashlytics {
         jmethodID m_Log;
         jmethodID m_RecordException;
         jmethodID m_RecordLuaError;
+        jmethodID m_RecordLogException;
         jmethodID m_TestJavaCrash;
     };
 
@@ -69,6 +70,22 @@ namespace dmFirebaseCrashlytics {
         env->DeleteLocalRef(jstr1);
     }
 
+    static void CallVoidMethodCharCharCharChar(jobject instance, jmethodID method, const char* cstr0, const char* cstr1, const char* cstr2, const char* cstr3)
+    {
+        dmAndroid::ThreadAttacher thread_attacher;
+        JNIEnv* env = thread_attacher.GetEnv();
+
+        jstring jstr0 = env->NewStringUTF(cstr0);
+        jstring jstr1 = env->NewStringUTF(cstr1);
+        jstring jstr2 = env->NewStringUTF(cstr2);
+        jstring jstr3 = env->NewStringUTF(cstr3);
+        env->CallVoidMethod(instance, method, jstr0, jstr1, jstr2, jstr3);
+        env->DeleteLocalRef(jstr0);
+        env->DeleteLocalRef(jstr1);
+        env->DeleteLocalRef(jstr2);
+        env->DeleteLocalRef(jstr3);
+    }
+
     static void CallVoidMethodCharBool(jobject instance, jmethodID method, const char* cstr, bool value)
     {
         dmAndroid::ThreadAttacher thread_attacher;
@@ -104,6 +121,7 @@ namespace dmFirebaseCrashlytics {
         g_firebase_crashlytics.m_Log = env->GetMethodID(cls, "log", "(Ljava/lang/String;)V");
         g_firebase_crashlytics.m_RecordException = env->GetMethodID(cls, "recordException", "(Ljava/lang/String;)V");
         g_firebase_crashlytics.m_RecordLuaError = env->GetMethodID(cls, "recordLuaError", "(Ljava/lang/String;Ljava/lang/String;)V");
+        g_firebase_crashlytics.m_RecordLogException = env->GetMethodID(cls, "recordLogException", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
         g_firebase_crashlytics.m_TestJavaCrash = env->GetMethodID(cls, "testJavaCrash", "()V");
     }
 
@@ -182,6 +200,11 @@ namespace dmFirebaseCrashlytics {
     void RecordLuaError(const char* message, const char* traceback)
     {
         CallVoidMethodCharChar(g_firebase_crashlytics.m_JNI, g_firebase_crashlytics.m_RecordLuaError, message, traceback);
+    }
+
+    void RecordLogException(const char* severity, const char* domain, const char* message, const char* signature)
+    {
+        CallVoidMethodCharCharCharChar(g_firebase_crashlytics.m_JNI, g_firebase_crashlytics.m_RecordLogException, severity, domain, message, signature);
     }
 
     void TestJavaCrash()

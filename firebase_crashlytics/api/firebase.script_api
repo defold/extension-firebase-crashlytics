@@ -9,7 +9,7 @@
     members:
     - name: initialize
       type: function
-      desc: Initializes Crashlytics and returns true if the core Firebase extension is available and the default FirebaseApp has been initialized. After successful initialization, Defold dmLogWarning messages are automatically added as Crashlytics logs for subsequent reports.
+      desc: Initializes Crashlytics and returns true if the core Firebase extension is available and the default FirebaseApp has been initialized. After successful initialization, Defold dmLogWarning messages are automatically added as Crashlytics logs for subsequent reports, and Defold dmLogError/dmLogFatal messages are recorded as non-fatal DefoldLogError/DefoldLogFatal reports with normalized signatures.
       returns:
       - name: initialized
         type: boolean
