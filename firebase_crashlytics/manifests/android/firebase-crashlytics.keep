@@ -1,0 +1,5 @@
+# Keep the source and line metadata required for readable Crashlytics reports.
+-keepattributes SourceFile,LineNumberTable
+
+# Native code loads the extension's Java bridge and methods by name through JNI.
+-keep,allowoptimization class com.defold.firebase.crashlytics.** { *; }
