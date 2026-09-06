@@ -1,7 +1,0 @@
--ignorewarnings
--keepattributes SourceFile,LineNumberTable
--keep public class * extends java.lang.Exception
--keep,includedescriptorclasses class com.defold.firebase.crashlytics.** { *; }
--keep,includedescriptorclasses class com.google.firebase.crashlytics.** { *; }
--keep,includedescriptorclasses class com.google.firebase.provider.FirebaseInitProvider { *; }
--keep,includedescriptorclasses class com.google.firebase.components.ComponentDiscoveryService { *; }
