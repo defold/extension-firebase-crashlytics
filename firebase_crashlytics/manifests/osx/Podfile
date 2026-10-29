@@ -1,3 +1,0 @@
-platform :osx, '11.0'
-
-pod 'FirebaseCrashlytics', '12.16.0'
